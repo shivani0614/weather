@@ -8,6 +8,12 @@
 
   <body>
     <div class="card">
+      °C
+      <label class="switch">
+        <input type="checkbox">
+        <span class="slider round"></span>
+      </label>
+      °F
       <div class="search">
         <input type="text" placeholder="enter city name" spellcheck="false" />
         <button><img src="images/search.png" /></button>
@@ -45,27 +51,54 @@
 
     <script>
       const apiKey = "532b2419da524c9f8e9c320ed304c1b0";
-      const apiURL = `https://api.openweathermap.org/data/2.5/weather?units=metric&appid=${apiKey}&q=`;
+      let unit = "metric" || "imperial"
+      let apiURL = `https://api.openweathermap.org/data/2.5/weather?units=${unit}&q=`;
+      
+      
       const search = document.querySelector(".search input");
       const button = document.querySelector(".search button");
       const weatherIcon = document.querySelector(".weather-icon");
+     
+      document.addEventListener('DOMContentLoaded', function () {
+        var checkbox = document.querySelector('input[type="checkbox"]');
+      
+        checkbox.addEventListener('change', function () {
+          if (checkbox.checked) {
+            // do this
+            //unit = "imperial"
+            apiURL = `https://api.openweathermap.org/data/2.5/weather?units=imperial&q=`;
+            console.log('F');
+            
+          } else {
+            // do that
+            apiURL = `https://api.openweathermap.org/data/2.5/weather?units=metric&q=`;
+            console.log('C');
+          }
+        });
+      });
+      
       async function checkWeather(city) {
-        const response = await fetch(apiURL + city);
+        const response = await fetch(apiURL + city + `&appid=${apiKey}` );
         // we can also write in this way - const response = await fetch( apiURL +`&appid=${apiKey}`);
         console.log(response);
         if (response.status == 404) {
           document.querySelector(".error").style.display = "block";
           document.querySelector(".weather").style.display = "none";
         } else {
+         
           var data = await response.json();
           console.log(data);
           document.querySelector(".city").innerHTML = data.name;
-          document.querySelector(".temp").innerHTML =
-            Math.round(data.main.temp) + " °c";
-          document.querySelector(".humidity").innerHTML =
-            data.main.humidity + " %";
+          
+          document.querySelector(".humidity").innerHTML = data.main.humidity + " %";
           document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
 
+          if(response.url.toString().indexOf("imperial") != -1){
+            document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + " °F";
+          }
+          else{
+            document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + " °C";
+          }
           if (data.weather[0].main == "Clouds") {
             weatherIcon.src = "images/clouds.png";
           } else if (data.weather[0].main == "Clear") {
@@ -89,6 +122,8 @@
       button.addEventListener("click", () => {
         checkWeather(search.value);
       });
+      
+     
     </script>
   </body>
 </html>
